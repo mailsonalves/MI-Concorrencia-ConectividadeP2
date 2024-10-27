@@ -7,6 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
+pydantic-settings = "^2.6.0"
+aiosqlite = "^0.20.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,8 +28,9 @@ select = [
 ]
 
 [tool.taskipy.tasks]
-run = 'uvicorn main:app --reload'
+run = 'fastapi dev app/main.py'
 test = 'pytest --cov=app'
+createdb = 'python app/config/init_db.py'
 
 [tool.pytest.ini_options]
 pythonpath = "."

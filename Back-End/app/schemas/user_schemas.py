@@ -27,4 +27,23 @@ class UserSchema(BaseModel):
         max_length=14
     )]
     
+class UserSchemaPublic(BaseModel):
+    username: Annotated[str, Field(
+        description='username do usuário',
+        examples=['user_1'],
+        max_length=50
+    )]
+    
+    nome: Annotated[str, Field(
+        description='Nome do usuário',
+        examples=['João'],
+        max_length=50
+    )]
+    
+    cpf: Annotated[str, Field(
+        description='CPF do usuário',
+        examples=['123.456.789-00'],
+        max_length=14
+    )]
+    
     
