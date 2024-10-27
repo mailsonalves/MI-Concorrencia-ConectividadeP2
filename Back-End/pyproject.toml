@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12.3"
 pydantic-settings = "^2.6.0"
 aiosqlite = "^0.20.0"
+alembic = "^1.13.3"
 
 
 [tool.poetry.group.dev.dependencies]
