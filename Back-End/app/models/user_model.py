@@ -6,9 +6,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 class UserModel(Base):
     __tablename__ = 'users'
-    pk_id: Mapped[int] =  mapped_column(Integer, primary_key=True, autoincrement=True, unique=True)
     nome: Mapped[str] = mapped_column(String(50), nullable=False)
     username: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(50), nullable=False)
     cpf: Mapped[str] = mapped_column(String(14), unique=True,  nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
+
