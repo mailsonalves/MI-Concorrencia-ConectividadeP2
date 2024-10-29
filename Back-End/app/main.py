@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers.router import api_router
+from app.routers.router import api_router
 import uvicorn
 from asyncio import run
 

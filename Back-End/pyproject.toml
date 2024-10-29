@@ -10,6 +10,9 @@ python = "^3.12.3"
 pydantic-settings = "^2.6.0"
 aiosqlite = "^0.20.0"
 alembic = "^1.13.3"
+greenlet = "^3.1.1"
+asyncpg = "^0.30.0"
+psycopg2 = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -33,6 +36,9 @@ run = 'fastapi dev app/main.py'
 test = 'pytest --cov=app'
 createdb = 'python app/config/init_db.py'
 path = '$env:PYTHONPATH = "."'
+run-migrate = 'alembic upgrade head'
+run-delete = 'alembic downgrade head'
+create-migrate = 'alembic revision --autogenerate -m "{m}"'
 
 [tool.pytest.ini_options]
 pythonpath = "."
