@@ -1,11 +1,18 @@
 from pwdlib import PasswordHash
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
 from zoneinfo import ZoneInfo
-from jwt import encode
+from app.utils.dependecies import DatabaseSession
+from jwt import decode, encode
 from datetime import datetime, timedelta
+
 pwd = PasswordHash.recommended()
+ouath2_schema = OAuth2PasswordBearer(tokenUrl='token')
 SECRET_KEY = ''
 ALGORITHM = 'HS256'
 TOKEN_EXPIRE_MIN = 30
+
+
 def get_password_hash(password: str):
     return pwd.hash(password)
 
@@ -21,3 +28,6 @@ def create_acess_token(data_payload: dict):
     
     return encode_jwt
     
+def verify_login(db_session: DatabaseSession, token: str = Depends(ouath2_schema)):
+    payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    username: str = payload.get('sub')
