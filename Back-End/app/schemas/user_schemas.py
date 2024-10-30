@@ -55,3 +55,9 @@ class UserSchemaList(BaseModel):
     
 class DeleteUserResponse(BaseModel):
     detail: Annotated[str, Field(description='mensagem de deletar')]
+    
+class TokenSchema(BaseModel):
+    access_token: Annotated[str, Field(description='Token de acesso')]
+    token_type: Annotated[str, Field(description='Tipo do token')]
+    
+    

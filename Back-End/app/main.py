@@ -1,9 +1,23 @@
 from fastapi import FastAPI
 from app.routers.router import api_router
 import uvicorn
-from asyncio import run
+from app.config.init_db import create_database,popular_banco
+from contextlib import asynccontextmanager
+import logging
 
-app = FastAPI(title="Passcom_api")
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logging.info("Iniciando o servidor e configurando o banco de dados...")
+
+    await create_database()
+    await popular_banco()
+    yield 
+
+    logging.info("Finalizando o servidor e limpando recursos...")
+app = FastAPI(title="Passcom_api", lifespan=lifespan)
 app.include_router(api_router)
 
 

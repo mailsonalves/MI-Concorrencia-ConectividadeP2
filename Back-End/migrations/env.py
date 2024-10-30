@@ -4,6 +4,10 @@ from logging.config import fileConfig
 from alembic import context
 from app.config.settings import Settings  # Importa suas configurações de URL de banco de dados
 from app.utils.models import Base
+from app.models.passagem_model import PassagemModel
+from app.models.user_model import UserModel
+from app.models.voo_model import VooModel
+
 
 
 # Carrega as configurações do banco de dados
