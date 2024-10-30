@@ -11,7 +11,7 @@ class UserModel(Base):
 
     nome: Mapped[str] = mapped_column(String(50), nullable=False)
     username: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String(50), nullable=False)
+    password: Mapped[str] = mapped_column(String(150), nullable=False)
     cpf: Mapped[str] = mapped_column(String(14), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
     
