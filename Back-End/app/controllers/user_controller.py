@@ -4,7 +4,7 @@ from sqlalchemy.future import select
 from app.schemas.user_schemas import UserSchema, UserSchemaPublic, UserSchemaList, DeleteUserResponse, TokenSchema
 from app.utils.dependecies import DatabaseSession
 from app.models.user_model import UserModel
-from app.security.security import get_password_hash, verify_password, create_acess_token, verify_login
+from app.security.security import get_password_hash, verify_password, create_acess_token, verify_login_current
 from uuid import UUID
 
 router = APIRouter()
@@ -69,7 +69,7 @@ async def update_user(db_session: DatabaseSession, user_id: str, user: UserSchem
     return {"detail": "Usuário deletado com sucesso"}
 
 @router.put("/{user_id}", response_model=DeleteUserResponse,  summary="Update User")
-async def update_user(db_session: DatabaseSession, user_id:str, user: UserSchema, current_user = Depends(verify_login)):
+async def update_user(db_session: DatabaseSession, user_id:str, user: UserSchema, current_user = Depends(verify_login_current)):
     try:
         user_id = UUID(user_id)
     except ValueError:
