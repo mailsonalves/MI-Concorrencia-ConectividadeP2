@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Navbar, Nav, Button } from 'react-bootstrap';
-
+import Modal from '../Modal/Modal';
 
 import './style.css';
 
 
 const CustomNavbar = () => {
- 
+const [openModal, setOpenModal] = useState(false)
 
   return (
     <>
@@ -20,13 +20,16 @@ const CustomNavbar = () => {
             
           />{' '}
    
-        </Navbar.Brand>
+        </Navbar.Brand> 
         <Nav>
           <div className='options'>
-          <button className="btn">Login</button>
+          <button className="btn" onClick={() => setOpenModal(true)}>Login</button>
           <p href ="">Cadastre-se</p>
           </div>
         </Nav>
+        <Modal isOpen={openModal} setModalOpen={() => setOpenModal(!openModal)}>
+        Conteúdo do modal
+      </Modal>
       </Navbar>
       
     </>
