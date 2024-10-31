@@ -4,6 +4,8 @@ from jwt import decode, encode
 from jwt.exceptions import PyJWTError
 from fastapi.security import OAuth2PasswordBearer
 from zoneinfo import ZoneInfo
+
+from sqlalchemy import select
 from app.utils.dependecies import DatabaseSession
 from jwt import decode, encode
 from datetime import datetime, timedelta
@@ -13,7 +15,7 @@ from app.config.settings import Settings
 
 pwd = PasswordHash.recommended()
 ouath2_schema = OAuth2PasswordBearer(tokenUrl='auth/token')
-settings = Settings
+settings = Settings()
 
 
 
@@ -24,15 +26,15 @@ def verify_password(plain_password: str, hashed_password: str):
     return pwd.verify(plain_password, hashed_password)
 
 def create_acess_token(data_payload: dict):
-    to_encode_copy = data_payload.copy
-    expire = datetime.now(tz=ZoneInfo('UTC')) + timedelta(min=settings.TOKEN_EXPIRE_MIN)
+    to_encode_copy = data_payload.copy()
+    expire = datetime.now(tz=ZoneInfo('UTC')) + timedelta(minutes=settings.TOKEN_EXPIRE_MIN)
     
     to_encode_copy.update({'exp':expire})
     encode_jwt = encode(to_encode_copy,settings.SECRET_KEY,algorithm=settings.ALGORITHM)
     
     return encode_jwt
     
-def verify_login_current(db_session: DatabaseSession , token: str = Depends(ouath2_schema)):
+async def verify_login_current(db_session: DatabaseSession , token: str = Depends(ouath2_schema)):
     try:
         payload = decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get('sub')
@@ -52,7 +54,9 @@ def verify_login_current(db_session: DatabaseSession , token: str = Depends(ouat
         )
 
 
-    user = db_session.query(UserModel).filter(UserModel.username == token_data.username).first()
+    user_validate = await db_session.execute(select(UserModel).filter_by(username=token_data.username))
+    user = user_validate.scalars().first()
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
