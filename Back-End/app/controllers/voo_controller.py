@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post(
     "/",
-    summary="Create Passagem",
+    summary="Create Voo",
     status_code=status.HTTP_201_CREATED,
     response_model=VooSchema,
 )

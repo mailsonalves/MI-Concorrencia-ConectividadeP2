@@ -48,58 +48,52 @@ async def read_user(db_session: DatabaseSession, limit: int = 15):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar usuários")
     
 @router.delete("/{user_id}", response_model=DeleteUserResponse, summary="Delete User")
-async def update_user(db_session: DatabaseSession, user_id: str, user: UserSchema):
+async def update_user(db_session: DatabaseSession, user_id: str, user: UserSchema,current_user = Depends(verify_login_current)):
 
     try:
         user_id = UUID(user_id)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ID inválido. Deve ser um UUID.")
-    
-
-    user_validate = await db_session.execute(select(UserModel).filter_by(id=user_id))
-    user = user_validate.scalars().first()
-    
-    if user is None:
+    if current_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    if current_user.id != user_id:
+        print(f'{current_user.id} => {user_id}')
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail='Not enough permissions'
+        )
     
-  
-    await db_session.delete(user)
-    await db_session.commit()
+    try:
+        await db_session.delete(current_user)
+        await db_session.commit()
+    except :
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao deletar o usuário")
     
     return {"detail": "Usuário deletado com sucesso"}
 
 @router.put("/{user_id}", response_model=DeleteUserResponse,  summary="Update User")
+
 async def update_user(db_session: DatabaseSession, user_id:str, user: UserSchema, current_user = Depends(verify_login_current)):
+    
     try:
         user_id = UUID(user_id)
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ID inválido. Deve ser um UUID.")
-    
-    user_validate = await db_session.execute(select(UserModel).filter_by(id=user_id))
-    user_db = user_validate.scalars().first()
-    
-    if user_db is None:
+    if current_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    if current_user.id != user_id:
+        print(f'{current_user.id} => {user_id}')
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail='Not enough permissions'
+        )
     
     try:
-        user_db.cpf = user.cpf
-        user_db.nome = user.nome
-        user_db.password = get_password_hash(user.password)
-        user_db.username = user.username
-        db_session.add(user_db)
+        current_user.cpf = user.cpf
+        current_user.nome = user.nome
+        current_user.password = get_password_hash(user.password)
+        current_user.username = user.username
+        db_session.add(current_user)
         await db_session.commit()
         return {"detail": "Usuário atualizado com sucesso"}
     except :
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao atualizar o usuário")
 
-@router.post('/token', response_model=TokenSchema)
-async def login_for_token(db_session: DatabaseSession,form_data: OAuth2PasswordRequestForm = Depends()):
-    user_validate = await db_session.execute(select(UserModel).filter_by(username=form_data.username))
-    existing_user = user_validate.scalars().first()
-    
-    if not existing_user or not verify_password(form_data.password, existing_user):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email ou senha incorreto")
-        
-    acess_token = create_acess_token(data_payload={'sub':existing_user.username})
-    
-    return {'access_token' : acess_token, 'token_type': 'Bearer'}
