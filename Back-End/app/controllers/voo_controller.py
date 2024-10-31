@@ -31,6 +31,6 @@ async def create_passagem(db_session: DatabaseSession, voo: VooSchema):
             return voo_instance
         except:
             await db_session.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao criar o usuário")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao criar o voo")
     else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O usuário já existe")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O voo já existe")

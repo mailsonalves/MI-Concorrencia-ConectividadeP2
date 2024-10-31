@@ -12,6 +12,7 @@ class PassagemModel(Base):
     id_voo: Mapped[UUID] = mapped_column(UUID, ForeignKey('voos.id'), nullable=False)
     id_passageiro: Mapped[UUID] = mapped_column(UUID, ForeignKey('users.id'), nullable=False)
     cpf: Mapped[str] = mapped_column(String(14), nullable=False)
+    companhia_aerea: Mapped[str] = mapped_column(String(50), nullable=False)
     assento: Mapped[str] = mapped_column(String(5), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
 
