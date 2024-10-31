@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Body, status, HTTPException
+from fastapi import APIRouter, Body, Depends, status, HTTPException
 from sqlalchemy.future import select
-from app.schemas.voo_schemas import VooSchema
+from app.schemas.voo_schemas import VooSchema, VooSchemaList
 from app.utils.dependecies import DatabaseSession
 from app.models.voo_model import VooModel
+from app.security.security import get_password_hash, verify_login_current, verify_password, create_acess_token
 from uuid import UUID
 
 router = APIRouter()
@@ -34,3 +35,12 @@ async def create_passagem(db_session: DatabaseSession, voo: VooSchema):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao criar o voo")
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O voo já existe")
+
+@router.get("/", response_model=VooSchemaList, summary="List Voos")
+async def read_user(db_session: DatabaseSession, limit: int = 15):
+    try:
+        result = await db_session.execute(select(VooModel).limit(limit))
+        voos = result.scalars().all()
+        return {'voos': voos}
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos")       

@@ -4,6 +4,9 @@ from pydantic import Field
 from pydantic import UUID4, Field
 
 class VooSchema(BaseModel):
+    id: Annotated[UUID4, Field(
+        description='ID único do voo',
+    )]
     origem: Annotated[str, Field(
         description='Origem do voo',
         examples=['Salvador'],
@@ -25,3 +28,6 @@ class VooSchema(BaseModel):
         description='Companhia Aerea',
         examples=['Companhia A'],
     )]
+
+class VooSchemaList(BaseModel):
+    voos: List[VooSchema]
