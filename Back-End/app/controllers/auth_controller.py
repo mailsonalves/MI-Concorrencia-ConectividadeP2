@@ -15,7 +15,7 @@ async def login_for_token(db_session: DatabaseSession,form_data: OAuth2PasswordR
     user_validate = await db_session.execute(select(UserModel).filter_by(username=form_data.username))
     existing_user = user_validate.scalars().first()
     
-    if not existing_user or not verify_password(form_data.password, existing_user):
+    if not existing_user or not verify_password(form_data.password, existing_user.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email ou senha incorreto")
         
     acess_token = create_acess_token(data_payload={'sub':existing_user.username})
