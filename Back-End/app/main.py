@@ -11,11 +11,11 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
-#     logging.info("Iniciando o servidor e configurando o banco de dados...")
+#      logging.info("Iniciando o servidor e configurando o banco de dados...")
 
-#     await create_database()
-#     await popular_banco()
-#     yield 
+#      await create_database()
+#      await popular_banco()
+#      yield 
 
 
 app = FastAPI(title="Passcom_api") 

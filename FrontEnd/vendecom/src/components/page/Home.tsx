@@ -10,7 +10,9 @@ interface Passagem {
   origem: string;
   destino: string;
   preco?: string; // Inclua a propriedade se a API retornar isso
-  imagemSrc?: string; // Inclua a propriedade se a API retornar isso
+  imagem_companhia: string; // Inclua a propriedade se a API retornar isso
+  companhia_aerea: string
+  id: string
 }
 
 function Home() {
@@ -94,7 +96,9 @@ function Home() {
               origem={passagem.origem}
               destino={passagem.destino}
               preco={passagem.preco || "100"}
-              imagemSrc={passagem.imagemSrc || "/logo.jpeg"}
+              imagemSrc={passagem.imagem_companhia}
+              companhia_aerea={passagem.companhia_aerea}
+              id_voo={passagem.id}
             />
           ))
         ) : (

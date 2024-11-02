@@ -7,7 +7,7 @@ interface Passagem {
   origem: string;
   destino: string;
   preco?: string;
-  imagemSrc?: string;
+  imagemSrc: string;
   assento: string;
   id_voo: string
 }
@@ -53,7 +53,9 @@ function ListTickets() {
       setVoos(response.data.tickets || []);
     } catch (err) {
       console.error("Erro ao carregar passagens:", err);
-      setError("Erro ao carregar todas as passagens");
+
+      const errorMsg = err.response?.data?.detail || "Erro ao carregar todas as passagens.";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -79,7 +81,7 @@ function ListTickets() {
                 origem={passagem.origem}
                 destino={passagem.destino}
                 preco={passagem.preco || "100"}
-                imagemSrc={passagem.imagemSrc || "/logo.jpeg"}
+                imagemSrc={passagem.imagem_companhia || "/logo.jpeg"}
                 assento={passagem.assento}
                 id_voo={passagem.id_voo}
               />

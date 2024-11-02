@@ -30,3 +30,6 @@ class PassagemSchema(BaseModel):
 
 class PassagemSchemaList(BaseModel):
     tickets: List[PassagemSchema]
+    
+class DeletePassagemResponse(BaseModel):
+    detail: Annotated[str, Field(description='mensagem de deletar')]

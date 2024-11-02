@@ -28,6 +28,14 @@ class VooSchema(BaseModel):
         description='Companhia Aerea',
         examples=['Companhia A'],
     )]
+    preco: Annotated[int, Field(
+        description='Companhia Aerea',
+        examples=['100'],
+    )]
+    imagem_companhia: Annotated[str, Field(
+        description='Companhia Aerea',
+        examples=['Companhia A'],
+    )]
 
 class VooSchemaList(BaseModel):
     voos: List[VooSchema]

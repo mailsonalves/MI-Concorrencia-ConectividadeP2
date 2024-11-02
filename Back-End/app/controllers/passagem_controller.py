@@ -2,7 +2,8 @@ from fastapi import APIRouter, Body, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from sqlalchemy.future import select
-from app.schemas.passagem_schemas import PassagemSchema, PassagemSchemaList
+from sqlalchemy.exc import SQLAlchemyError
+from app.schemas.passagem_schemas import PassagemSchema, PassagemSchemaList, DeletePassagemResponse
 from app.models.voo_model import VooModel
 from app.utils.dependecies import DatabaseSession
 from app.models.passagem_model import PassagemModel
@@ -40,14 +41,27 @@ async def buy_ticket(user_id: UUID, db_session: DatabaseSession, passagem: Passa
     )
     
     try:
-        assento_validate = await db_session.execute(select(PassagemModel).filter_by(assento=passagem.assento))
-        assento_user = assento_validate.scalars().first()
+        # Verifica se o assento já está ocupado
+        assento_validate = await db_session.execute(
+            select(PassagemModel).where(
+                (PassagemModel.assento == passagem.assento) & 
+                (PassagemModel.id_voo == passagem.id_voo)
+            )
+        )
+        assento_ocupado = assento_validate.scalars().first()
         
-        if assento_user:
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Assento Ocupado")
-            
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Falha ao selecionar assento passagem")
+        if assento_ocupado:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Assento Ocupado"
+            )
+
+    except SQLAlchemyError as e:
+        # Exibe o erro no log para diagnóstico
+        print(f"Erro ao verificar assento: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Falha ao selecionar assento passagem"
+        )
         
         
     count_passagem = result.scalar()
@@ -84,4 +98,33 @@ async def read_user(user_id: UUID, db_session: DatabaseSession, limit: int = 15,
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar usuários")       
     
+@router.delete("/{passagem_id}", response_model=DeletePassagemResponse, summary="Delete ticket")
+async def delete_ticket(db_session: DatabaseSession, passagem_id: str, current_user=Depends(verify_login_current)):
     
+    try:
+        passagem_id = UUID(passagem_id)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ID inválido. Deve ser um UUID.")
+    
+    if current_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+    
+    result = await db_session.execute(
+        select(PassagemModel).where(PassagemModel.id == passagem_id)  # Usando o modelo Ticket aqui
+    )
+    
+    ticket = result.scalars().first()  
+    if ticket is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Passagem não encontrada")
+    
+    # Verificar se o usuário tem permissão para deletar a passagem (ajuste conforme necessário)
+    if ticket.id_passageiro != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permissão insuficiente para deletar esta passagem")
+    
+    try:
+        await db_session.delete(ticket)
+        await db_session.commit()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao deletar a passagem")
+    
+    return {"detail": "Passagem deletada com sucesso"}

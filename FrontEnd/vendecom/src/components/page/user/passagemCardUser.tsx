@@ -12,13 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import axios from "axios";
 
 interface PassagemCardProps {
@@ -45,6 +38,32 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
  
   const handleVoo = () => {
     setIsDialogOpen(true);
+  };
+  const handleDeleteUser =async () => {
+    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!user || !token) {
+      //setError("Usuário ou token não encontrado.");
+      //setLoading(false);
+      return;
+    }
+    const userDecode = JSON.parse(user);
+
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/ticket/?user_id=${userDecode.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      //setVoos(response.data.tickets || []);
+    } catch (err) {
+      console.error("Erro ao carregar passagens:", err);
+
+      const errorMsg = err.response?.data?.detail || "Erro ao carregar todas as passagens.";
+      //setError(errorMsg);
+    } 
   };
 
   return (
