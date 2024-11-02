@@ -28,7 +28,9 @@ const [openModal, setOpenModal] = useState(false)
           </div>
         </Nav>
         <Modal isOpen={openModal} setModalOpen={() => setOpenModal(!openModal)}>
-        Conteúdo do modal
+        <div className='conteudoModal'>
+
+        </div>
       </Modal>
       </Navbar>
       
