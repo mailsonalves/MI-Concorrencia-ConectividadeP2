@@ -8,12 +8,14 @@ export default function Modal({ isOpen, setModalOpen, children }) {
     return (
       <div className='background'>
         <div className='estiloModal'>
-          <div style={{ cursor: 'pointer'}} onClick={setModalOpen}>
-            x
-          </div>
-          <div>{children}</div>
-          <button onClick={setModalOpen}>Fechar</button>
+          
+          <div >{children} </div>
+          
+          <button onClick={setModalOpen}>x</button>
+         
         </div>
+       
+
       </div>
     )
   }
