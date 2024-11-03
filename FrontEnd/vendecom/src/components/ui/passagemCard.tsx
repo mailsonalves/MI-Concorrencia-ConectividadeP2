@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import axios from "axios";
-import { Plane } from "lucide-react";
+import { Plane, Smile, Frown } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -41,6 +41,7 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
   const [assento, setAssento] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [sucess, setSucess] = useState<string | null>(null);
 
   const handleVoo = () => {
     setIsDialogOpen(true);
@@ -49,19 +50,19 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
   const handleBuyPass = useCallback(async () => {
     setLoading(true);
     setError(null);
-
+    setSucess(null); // Limpa a mensagem de sucesso anterior
+  
     const user = localStorage.getItem("user");
     const token = localStorage.getItem("token");
-
+  
     if (!user || !token) {
-      setError("Usuário ou token não encontrado.");
+      setError("Efetue o login para continuar.");
       setLoading(false);
       return;
     }
-
+  
     const userDecode = JSON.parse(user);
-
-    // Objeto para envio no request
+  
     const requestData = {
       id_voo,
       id_passageiro: userDecode.id,
@@ -69,8 +70,7 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
       assento,
       companhia_aerea,
     };
-    console.log(requestData);
-
+  
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/ticket/buy_ticket/?user_id=${userDecode.id}`,
@@ -79,17 +79,31 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("Passagem comprada com sucesso:", response.data);
-    } catch (err) {
-      console.error("Erro ao carregar passagens:", err);
+  
+      // Confirmação visual de sucesso e reset do estado
+      setSucess("Passagem comprada com sucesso!");
+      setTimeout(() => setSucess(null), 5000); // Remove a mensagem de sucesso após 5 segundos
 
-      // Capture specific error message if available
-      const errorMsg = err.response?.data?.detail || "Erro ao carregar todas as passagens.";
+    } catch (err) {
+      console.error("Erro ao comprar passagem:", err);
+  
+      let errorMsg = "Erro ao carregar todas as passagens.";
+      if (err.response) {
+        if (err.response.status === 401) {
+          errorMsg = "Sessão expirada. Faça login novamente.";
+        } else if (err.response.status === 500) {
+          errorMsg = "Erro no servidor. Tente novamente mais tarde.";
+        } else {
+          errorMsg = err.response.data?.detail || errorMsg;
+        }
+      }
       setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
   }, [id_voo, assento, companhia_aerea]);
+  
 
   return (
     <div>
@@ -156,9 +170,24 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
           </div>
           <div className="text-center">
             {error && (
-              <p className="text-xs font-bold text-red-500 col-span-4">
-                {error}
-              </p>
+              <div>
+                <p className="flex justify-center gap-2 text-xs items-center font-bold text-red-600 col-span-4">
+                  <span>
+                    <Frown />
+                  </span>
+                  {error}
+                </p>
+              </div>
+            )}
+            {sucess && (
+              <div>
+                <p className="flex justify-center gap-2 text-xs items-center font-bold text-green-600 col-span-4">
+                  <span>
+                    <Smile />
+                  </span>
+                  {sucess}
+                </p>
+              </div>
             )}
           </div>
           <DialogFooter className="flex justify-center">
