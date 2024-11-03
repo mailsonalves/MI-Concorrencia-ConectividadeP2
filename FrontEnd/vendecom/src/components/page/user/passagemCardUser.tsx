@@ -21,6 +21,7 @@ interface PassagemCardProps {
   imagemSrc: string;
   assento: string;
   id_voo: string;
+  id_passagem: string;
 
 }
 
@@ -30,6 +31,7 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
   preco,
   imagemSrc,
   assento,
+  id_passagem,
   id_voo
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -39,32 +41,26 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
   const handleVoo = () => {
     setIsDialogOpen(true);
   };
-  const handleDeleteUser =async () => {
-    const user = localStorage.getItem("user");
+    const handleDeleteTicket = async () => {
     const token = localStorage.getItem("token");
 
-    if (!user || !token) {
-      //setError("Usuário ou token não encontrado.");
-      //setLoading(false);
-      return;
-    }
-    const userDecode = JSON.parse(user);
 
     try {
-      const response = await axios.delete(
-        `http://127.0.0.1:8000/ticket/?user_id=${userDecode.id}`,
+      await axios.delete(
+        `http://127.0.0.1:8000/ticket/${id_passagem}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      //setVoos(response.data.tickets || []);
+      console.log("Ticket deletado com sucesso");
+      window.location.reload();
     } catch (err) {
-      console.error("Erro ao carregar passagens:", err);
-
-      const errorMsg = err.response?.data?.detail || "Erro ao carregar todas as passagens.";
-      //setError(errorMsg);
-    } 
+      console.error("Erro ao deletar ticket:", err);
+      const errorMsg = err.response?.data?.detail || "Erro ao deletar o ticket.";
+      console.error(errorMsg);
+    }
   };
+
 
   return (
     <div className="">
@@ -140,7 +136,7 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
           <DialogFooter className="flex justify-center">
             <Button
               variant={"destructive"}
-              onClick={() => setIsDialogOpen(false)}
+              onClick={handleDeleteTicket}
             >
               Deletar
             </Button>

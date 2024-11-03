@@ -12,7 +12,7 @@ interface Passagem {
   preco?: string; // Inclua a propriedade se a API retornar isso
   imagem_companhia: string; // Inclua a propriedade se a API retornar isso
   companhia_aerea: string
-  id: string
+  id: string;
 }
 
 function Home() {
@@ -98,7 +98,7 @@ function Home() {
               preco={passagem.preco || "100"}
               imagemSrc={passagem.imagem_companhia}
               companhia_aerea={passagem.companhia_aerea}
-              id_voo={passagem.id}
+              id_voo ={passagem.id}
             />
           ))
         ) : (

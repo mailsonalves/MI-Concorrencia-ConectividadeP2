@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
-from app.schemas.passagem_schemas import PassagemSchema, PassagemSchemaList, DeletePassagemResponse
+from app.schemas.passagem_schemas import PassagemSchema, PassagemSchemaList, DeletePassagemResponse, PassagemSchema2
 from app.models.voo_model import VooModel
 from app.utils.dependecies import DatabaseSession
 from app.models.passagem_model import PassagemModel
@@ -13,7 +13,7 @@ from uuid import UUID
 router = APIRouter()
 
 @router.post('/buy_ticket', response_model=PassagemSchema, summary='Buy ticket')
-async def buy_ticket(user_id: UUID, db_session: DatabaseSession, passagem: PassagemSchema, current_user=Depends(verify_login_current)):
+async def buy_ticket(user_id: UUID, db_session: DatabaseSession, passagem: PassagemSchema2, current_user=Depends(verify_login_current)):
     passagem = PassagemModel(**passagem.model_dump())
     try:
 
@@ -80,7 +80,7 @@ async def buy_ticket(user_id: UUID, db_session: DatabaseSession, passagem: Passa
             
       
 @router.get("/", response_model=PassagemSchemaList, summary="List tickets")
-async def read_user(user_id: UUID, db_session: DatabaseSession, limit: int = 15, current_user=Depends(verify_login_current)):
+async def delete_passagem(user_id: UUID, db_session: DatabaseSession, limit: int = 15, current_user=Depends(verify_login_current)):
     try:
         user_id = UUID(str(user_id))
     except ValueError:
