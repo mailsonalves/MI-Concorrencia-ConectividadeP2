@@ -55,7 +55,7 @@ async def read_user(current_user = Depends(verify_login_current)):
 
     
 @router.delete("/{user_id}", response_model=DeleteUserResponse, summary="Delete User")
-async def update_user(db_session: DatabaseSession, user_id: str, user: UserSchema,current_user = Depends(verify_login_current)):
+async def delete_user(db_session: DatabaseSession, user_id: str, user: UserSchema,current_user = Depends(verify_login_current)):
 
     try:
         user_id = UUID(user_id)

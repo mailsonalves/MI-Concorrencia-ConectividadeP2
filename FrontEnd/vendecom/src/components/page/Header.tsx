@@ -158,7 +158,7 @@ function Header() {
             <ul className="flex w-screen pr-10 items-center justify-between">
               <Link href="/" className="flex gap-4 items-center">
                 <Link>
-                  <img src="/logo.jpeg" alt="" className="h-14 rounded-full" />
+                  <img src="/brasilpass.jpeg" alt="" className="h-14 rounded-full" />
                 </Link>
                 <h1 className="text-white text-lg">BrasilPass</h1>
               </Link>

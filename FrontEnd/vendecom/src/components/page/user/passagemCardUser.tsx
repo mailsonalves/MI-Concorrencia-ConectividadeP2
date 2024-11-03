@@ -12,13 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import axios from "axios";
 
 interface PassagemCardProps {
@@ -28,6 +21,7 @@ interface PassagemCardProps {
   imagemSrc: string;
   assento: string;
   id_voo: string;
+  id_passagem: string;
 
 }
 
@@ -37,6 +31,7 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
   preco,
   imagemSrc,
   assento,
+  id_passagem,
   id_voo
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,6 +41,26 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
   const handleVoo = () => {
     setIsDialogOpen(true);
   };
+    const handleDeleteTicket = async () => {
+    const token = localStorage.getItem("token");
+
+
+    try {
+      await axios.delete(
+        `http://127.0.0.1:8000/ticket/${id_passagem}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log("Ticket deletado com sucesso");
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao deletar ticket:", err);
+      const errorMsg = err.response?.data?.detail || "Erro ao deletar o ticket.";
+      console.error(errorMsg);
+    }
+  };
+
 
   return (
     <div className="">
@@ -121,7 +136,7 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
           <DialogFooter className="flex justify-center">
             <Button
               variant={"destructive"}
-              onClick={() => setIsDialogOpen(false)}
+              onClick={handleDeleteTicket}
             >
               Deletar
             </Button>
