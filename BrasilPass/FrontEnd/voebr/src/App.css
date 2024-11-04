@@ -1,0 +1,11 @@
+.general{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: top;
+  padding-top: 10px;
+  height: 100%;
+ 
+
+  
+}

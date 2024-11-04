@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_DB: voebr
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abacaxi01
+    ports:
+      - "5432:5432"
+    
