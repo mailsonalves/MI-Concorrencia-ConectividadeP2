@@ -28,9 +28,16 @@ Este relatório tem como objetivo apresentar o desenvolvimento de um sistema dis
 A seguir, detalharemos os aspectos técnicos e operacionais do sistema, além dos desafios enfrentados durante o processo de desenvolvimento e os resultados alcançados.
 
 # Arquitetura da aplicação
-A arquitetura do sistema é baseada no cliente-servidor, porém contendo uma comunicação entre servidores. Resumidamente, é como se quando um servidor for comunicar com outro, o remetente da mensagem é como um cliente.
+A arquitetura do sistema é baseada no cliente-servidor, porém contendo uma comunicação entre servidores. Resumidamente, é como se quando um servidor for comunicar com outro, o remetente da mensagem é como um cliente. A figura 1 mostra como funciona a arquitetura do sistema e como ocorre a comunicação entre o componentes.
+<p align="center">Figura 1. Arquitetura do sistema</p>
+<div align="center">
+<img src="https://github.com/user-attachments/assets/9216cdab-73fa-477c-a3b0-5bb4d9e3c42f" >
+</div>
+<h3>Banco de Dados</h3>
+Foi escolhido o banco de dados relacional PostgreSQL para armazenar as informações do sistema. Cada servidor possui um banco de dados executando isoladamente em seu próprio container Docker. Cada usuário poderá se cadastrar e fazer login apenas a partir do seu servidor de origem, mas podendo visualizar e interagir com os dados dos outros servidores.
+
 #  Protocolo de comunicação
-A comunicação foi realizada por meio de uma API REST, que recebe e envia dados em formato JSON, adotando o princípio stateless, no qual cada requisição contém todas as informações necessárias para seu processamento. Os endpoints são protegidos por autenticação JWT, exigindo que os usuários estejam autenticados para realizar as seguintes operações: visualizar trechos, comprar passagens, consultar passagens e cancelar passagens. Foram implementados dois conjuntos de rotas: uma para a comunicação entre servidores e outra para a interação entre clientes e servidores. A documentação detalhada da API está disponível mais adiante neste artigo.
+A comunicação foi realizada por meio de uma API REST, que recebe e envia dados em formato JSON, adotando o princípio stateless, no qual cada requisição contém todas as informações necessárias para seu processamento. Os endpoints são protegidos por autenticação, exigindo que os usuários estejam autenticados para realizar as seguintes operações: visualizar trechos, comprar passagens, consultar passagens e cancelar passagens. Foram implementados dois conjuntos de rotas: uma para a comunicação entre servidores e outra para a interação entre clientes e servidores. A documentação detalhada da API está disponível mais adiante neste artigo.
 
 # Interface da Aplicação
 
