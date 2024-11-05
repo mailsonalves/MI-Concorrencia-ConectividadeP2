@@ -1,0 +1,26 @@
+name: voebr
+
+services:
+  pg:
+    image: postgres:11-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abacaxi01 
+      POSTGRES_DB: voeBr
+    ports:
+      - "5434:5434"
+
+  passcom_app:
+    image: voebr
+    build: .
+    ports:
+      - "8002:8002"
+    depends_on:
+      - pg
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:abacaxi01@pg:5432/voeBr 
+
+volumes:
+  pgdata:
