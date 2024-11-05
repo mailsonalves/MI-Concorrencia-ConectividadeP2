@@ -35,11 +35,27 @@ A arquitetura do sistema é baseada no cliente-servidor, porém contendo uma com
 </div>
 <h3>Banco de Dados</h3>
 Foi escolhido o banco de dados relacional PostgreSQL para armazenar as informações do sistema. Cada servidor possui um banco de dados executando isoladamente em seu próprio container Docker. Cada usuário poderá se cadastrar e fazer login apenas a partir do seu servidor de origem, mas podendo visualizar e interagir com os dados dos outros servidores.
+<h3>Comunicação entre servidores</h3>
+Para gerenciar a lógica e regras de negócio da aplicação foi escolhido o framework FastAPI para o backend do sitema. A utilização do FastApi facilitou a comunicação cliente-servidor e servidor-servidor através das rotas especificadas em portas de rede disitintas. Além disso, o uso do framework facilitou a integração com o front-end da aplicação especificando como as requisições devem ser feitas aos servidores.
+<h3>Interface Gráfica</h3>
+Para a implementação da interface gráfica do sistema foi utilizado o framework ReactJS. A ideia é oferecer ao usuário final do sitema uma interface clara e intuitiva para proporcionar uma boa experência de compra.
+Algumas das principais telas do sistema estão mostradas nas figuras a seguir. A figura 2 mostra  a tela de listagem de voos do sistema sem o usuário estar logado em uma das companhias aéreas.
+Já a figura 3 mostra a finalização de compra da passagem.
+
+<p align="center">Figura 2. Tela de pesquisa de passagens </p>
+<div align="center">
+<img src="https://github.com/user-attachments/assets/8055008e-bfc4-46d2-a871-b700d1fbb1f2" width="700">
+</div>
+<p align="center">Figura 3. Modal de compra de passagem </p>
+<div align="center">
+<img src="https://github.com/user-attachments/assets/44b5ac42-fd58-4fff-a02f-f3ac7716b9dd" width="700">
+</div>
 
 #  Protocolo de comunicação
 A comunicação foi realizada por meio de uma API REST, que recebe e envia dados em formato JSON, adotando o princípio stateless, no qual cada requisição contém todas as informações necessárias para seu processamento. Os endpoints são protegidos por autenticação, exigindo que os usuários estejam autenticados para realizar as seguintes operações: visualizar trechos, comprar passagens, consultar passagens e cancelar passagens. Foram implementados dois conjuntos de rotas: uma para a comunicação entre servidores e outra para a interação entre clientes e servidores. A documentação detalhada da API está disponível mais adiante neste artigo.
 
 # Interface da Aplicação
+Falar sobre o rest
 
 # Concorrência Distribuída
 
