@@ -39,7 +39,7 @@ select = [
 ]
 
 [tool.taskipy.tasks]
-run = 'fastapi dev app/main.py'
+run = 'uvicorn app.main:app --host 127.0.0.1 --port 8002 --reload'
 test = 'pytest --cov=app'
 createdb = 'python app/config/init_db.py'
 path = '$env:PYTHONPATH = "."'

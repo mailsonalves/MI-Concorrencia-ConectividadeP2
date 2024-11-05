@@ -93,7 +93,11 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
           errorMsg = "Sessão expirada. Faça login novamente.";
         } else if (err.response.status === 500) {
           errorMsg = "Erro no servidor. Tente novamente mais tarde.";
-        } else {
+        } 
+        else if (err.response.status === 400) {
+          errorMsg = "Assento Ocupado";
+        }
+        else {
           errorMsg = err.response.data?.detail || errorMsg;
         }
       }

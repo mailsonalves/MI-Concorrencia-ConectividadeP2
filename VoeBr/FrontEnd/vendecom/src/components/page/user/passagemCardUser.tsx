@@ -47,7 +47,7 @@ const PassagemCardUser: React.FC<PassagemCardProps> = ({
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/ticket/${id_passagem}`,
+        `http://127.0.0.1:8002/ticket/${id_passagem}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

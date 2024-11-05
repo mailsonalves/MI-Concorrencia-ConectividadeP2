@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import List, Optional
+import unicodedata
 from fastapi import APIRouter, Body, Depends, status, HTTPException
+import httpx
 from sqlalchemy.future import select
 from app.schemas.voo_schemas import VooSchema, VooSchemaList
 from app.utils.dependecies import DatabaseSession
@@ -37,32 +39,135 @@ async def create_voos(db_session: DatabaseSession, voo: VooSchema):
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O voo já existe")
 
-@router.get("/", response_model=VooSchemaList, summary="List Voos")
+import random
+from fastapi import APIRouter, HTTPException, status
+from sqlalchemy.future import select
+import httpx
+
+router = APIRouter()
+
+@router.get("/", response_model=VooSchemaList, summary="Listar Voos")
+async def read_voos(db_session: DatabaseSession, limit: int = 15):
+    try:
+        # Obter voos locais
+        result = await db_session.execute(select(VooModel).limit(limit))
+        voos_locais = result.scalars().all()
+        voos_remotos = []
+
+        async with httpx.AsyncClient() as client:
+            try:
+                dados_B = await client.get("http://localhost:8000/voo/list_public")
+                dados_B.raise_for_status()
+                voos_remotos.extend(dados_B.json().get('voos', []))
+            except (httpx.RequestError, httpx.HTTPStatusError):
+                print("Erro ao comunicar com o Servidor B, continuando com os dados locais.")
+
+            try:
+                dados_C = await client.get("http://localhost:8002/voo/list_public")
+                dados_C.raise_for_status()
+                voos_remotos.extend(dados_C.json().get('voos', []))
+            except (httpx.RequestError, httpx.HTTPStatusError):
+                print("Erro ao comunicar com o Servidor C, continuando com os dados locais.")
+
+        # Combinar os voos locais e remotos
+        todos_voos = voos_locais + voos_remotos
+
+        # Embaralhar a lista de voos
+        random.shuffle(todos_voos)
+
+        return {'voos': todos_voos}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao listar voos: {str(e)}"
+        )
+     
+      
+async def fetch_voos_from_server(url: str, params: dict) -> List[dict]:
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, params=params)
+            response.raise_for_status()
+            print(response.json())
+            return response.json().get('voos', [])
+        except (httpx.RequestError, httpx.HTTPStatusError) as e:
+            print(f"Erro ao comunicar com {url}: {str(e)}")
+            return []  
+        
+def format_location(location: str) -> str:
+    location = location.strip()
+    location = location.title()
+    corrections = {
+    "De": "de",
+    "Do": "do",
+    "Da": "da",
+    "E": "e"
+    # Adicione mais palavras que você deseja manter em minúsculas
+    }
+    for key, value in corrections.items():
+        location = location.replace(key.title(), value)
+    return location
+
+@router.get("/find", response_model=VooSchemaList, summary="List Voos")
+async def read_voos_origem_destino(db_session: DatabaseSession, origem: Optional[str] = None, destino: Optional[str] = None, voo_id: Optional[UUID] = None):  
+    if origem and destino:
+        origem = format_location(origem)
+        destino = format_location(destino)
+        
+    try:
+        # Verifica se o ID do voo foi fornecido
+        if voo_id is not None:
+            result = await db_session.execute(select(VooModel).where(VooModel.id == voo_id))
+            voos = result.scalars().all()
+        elif origem and destino:
+            result = await db_session.execute(
+                select(VooModel).where((VooModel.destino == destino) & (VooModel.origem == origem))
+            )
+            voos = result.scalars().all()
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Parâmetros insuficientes")
+
+        # Busca voos remotos
+        voos_remotos_B = await fetch_voos_from_server("http://localhost:8000/voo/find_public", {"origem": origem, "destino": destino})
+        voos_remotos_C = await fetch_voos_from_server("http://localhost:8002/voo/find_public", {"origem": origem, "destino": destino})
+
+
+        # Combina voos locais e remotos
+        todos_voos = voos + voos_remotos_B  + voos_remotos_C
+
+        return {'voos': todos_voos}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao listar voos: {str(e)}") 
+    
+@router.get("/find_public", response_model=VooSchemaList, summary="List Voos")
+async def read_voos_origem_destino(db_session: DatabaseSession, origem: Optional[str] = None, destino: Optional[str] = None, voo_id: Optional[UUID] = None):  
+    if origem and destino:
+        origem = format_location(origem)
+        destino = format_location(destino)
+        
+    try:
+        # Verifica se o ID do voo foi fornecido
+        if voo_id is not None:
+            result = await db_session.execute(select(VooModel).where(VooModel.id == voo_id))
+            voos = result.scalars().all()
+        elif origem and destino:
+            result = await db_session.execute(
+                select(VooModel).where((VooModel.destino == destino) & (VooModel.origem == origem))
+            )
+            voos = result.scalars().all()
+            return {'voos': voos}
+            
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Parâmetros insuficientes")
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao listar voos: {str(e)}") 
+
+@router.get("/list_public", response_model=VooSchemaList, summary="List Voos")
 async def read_voos(db_session: DatabaseSession, limit: int = 15):
     try:
         result = await db_session.execute(select(VooModel).limit(limit))
         voos = result.scalars().all()
         return {'voos': voos}
     except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos")     
-      
-@router.get("/find", response_model=VooSchemaList, summary="List Voos")
-async def read_voos_origem_destino(
-    db_session: DatabaseSession, 
-    origem: Optional[str] = None, 
-    destino: Optional[str] = None, 
-    voo_id: Optional[UUID] = None
-):
-    try:
-        # Verifica se o ID do voo foi fornecido
-        if voo_id is not None:
-            result = await db_session.execute(select(VooModel).where(VooModel.id == voo_id))
-        elif origem and destino:
-            result = await db_session.execute(select(VooModel).where((VooModel.destino == destino) & (VooModel.origem == origem)))
-        else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Parâmetros insuficientes")
-
-        voos = result.scalars().all()
-        return {'voos': voos}
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos")     
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos") 

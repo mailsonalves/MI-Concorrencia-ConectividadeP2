@@ -1,8 +1,8 @@
-"""alteraçao no user password 2
+"""retirando relacionamento
 
-Revision ID: ff9605d88ae1
-Revises: a54c07313a1d
-Create Date: 2024-10-29 21:16:01.115534
+Revision ID: 43366cfe2718
+Revises: cf9861d5e762
+Create Date: 2024-11-04 16:29:49.623771
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ff9605d88ae1'
-down_revision: Union[str, None] = 'a54c07313a1d'
+revision: str = '43366cfe2718'
+down_revision: Union[str, None] = 'cf9861d5e762'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

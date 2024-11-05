@@ -13,6 +13,7 @@ interface Passagem {
   imagemSrc: string;
   assento: string;
   id_voo: string;
+  companhia_aerea: string;
 }
 
 interface Voo {
@@ -36,11 +37,27 @@ function ListTickets() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getVooDetails = async (id_voo: string): Promise<Voo | null> => {
+  const getVooDetails = async (id_voo: string, companhiaAerea: string): Promise<Voo | null> => {
+    let url = '';
+  
+    // Definir a URL do servidor com base na companhia aérea
+    switch (companhiaAerea) {
+      case 'BrasilPass':
+        url = `http://127.0.0.1:8000/voo/find/?voo_id=${id_voo}`;
+        break;
+      case 'BrAirlines':
+        url = `http://127.0.0.1:8001/voo/find/?voo_id=${id_voo}`;
+        break;
+      case 'VoeBr':
+        url = `http://127.0.0.1:8002/voo/find/?voo_id=${id_voo}`;
+        break;
+      default:
+        console.error("Companhia aérea não reconhecida:", companhiaAerea);
+        return null; // Retorna null se a companhia não for reconhecida
+    }
+  
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/voo/find/?voo_id=${id_voo}`
-      );
+      const response = await axios.get(url);
       const voo = response.data.voos ? response.data.voos[0] : null; // Acessa o primeiro elemento do array 'voos'
       return voo;
     } catch (err) {
@@ -77,7 +94,7 @@ function ListTickets() {
 
       const mapTicketWithVoo = async (passagem: Passagem) => {
         try {
-          const vooDetails = await getVooDetails(passagem.id_voo);
+          const vooDetails = await getVooDetails(passagem.id_voo, passagem.companhia_aerea);
           console.log(
             `Detalhes do voo para ID ${passagem.id_voo}:`,
             vooDetails

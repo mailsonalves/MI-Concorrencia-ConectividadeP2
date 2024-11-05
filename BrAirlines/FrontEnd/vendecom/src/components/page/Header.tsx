@@ -114,7 +114,7 @@ function Header() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/auth/token",
+        "http://127.0.0.1:8001/auth/token",
         data,
         {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -160,7 +160,7 @@ function Header() {
                 <Link>
                   <img src="/brAirlines.jpeg" alt="" className="h-14 rounded-full" />
                 </Link>
-                <h1 className="text-white text-lg">Brairlines</h1>
+                <h1 className="text-white text-lg">BrAirlines</h1>
               </Link>
               <ul className="flex gap-2  mr-10">
                 <li>

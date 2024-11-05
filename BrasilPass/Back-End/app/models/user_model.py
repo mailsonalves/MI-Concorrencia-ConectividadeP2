@@ -15,5 +15,4 @@ class UserModel(Base):
     cpf: Mapped[str] = mapped_column(String(14), unique=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.now)
     
-    # Relacionamento com PassagemModel
-    passagens_voo: Mapped[List['PassagemModel']] = relationship('PassagemModel', back_populates='usuario')
+

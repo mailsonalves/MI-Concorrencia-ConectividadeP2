@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: abacaxi01 
       POSTGRES_DB: passcom
     ports:
-      - "5432:5432"
+      - "5433:5433"
 
   passcom_app:
     image: passcom_app
@@ -20,7 +20,7 @@ services:
     depends_on:
       - pg
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:abacaxi01@pg:5432/passcom
+      DATABASE_URL: postgresql+asyncpg://postgres:abacaxi01@pg:5432/passcom 
 
 volumes:
   pgdata:

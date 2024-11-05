@@ -89,7 +89,7 @@ function Header() {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:8001/user/", data);
+      const response = await axios.post("http://127.0.0.1:8002/user/", data);
       
     } catch (err) {
       console.error(err.response ? err.response.data : err);
@@ -114,7 +114,7 @@ function Header() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8001/auth/token",
+        "http://127.0.0.1:8002/auth/token",
         data,
         {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -127,7 +127,7 @@ function Header() {
 
       // Fetch user information after successful login
       try {
-        const userResponse = await axios.get("http://127.0.0.1:8000/user/", {
+        const userResponse = await axios.get("http://127.0.0.1:8002/user/", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -158,9 +158,9 @@ function Header() {
             <ul className="flex w-screen pr-10 items-center justify-between">
               <Link href="/" className="flex gap-4 items-center">
                 <Link>
-                  <img src="/brasilpass.jpeg" alt="" className="h-14 rounded-full" />
+                  <img src="/voebr.jpeg" alt="" className="h-14 rounded-full" />
                 </Link>
-                <h1 className="text-white text-lg">BrasilPass</h1>
+                <h1 className="text-white text-lg">VoeBr</h1>
               </Link>
               <ul className="flex gap-2  mr-10">
                 <li>

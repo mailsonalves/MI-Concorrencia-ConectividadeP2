@@ -73,7 +73,7 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
   
     try {
       const response = await axios.post(
-        `http://127.0.0.1:8000/ticket/buy_ticket/?user_id=${userDecode.id}`,
+        `http://127.0.0.1:8002/ticket/buy_ticket/?user_id=${userDecode.id}`,
         requestData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +93,11 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
           errorMsg = "Sessão expirada. Faça login novamente.";
         } else if (err.response.status === 500) {
           errorMsg = "Erro no servidor. Tente novamente mais tarde.";
-        } else {
+        } 
+        else if (err.response.status === 400) {
+          errorMsg = "Assento Ocupado";
+        }
+        else {
           errorMsg = err.response.data?.detail || errorMsg;
         }
       }

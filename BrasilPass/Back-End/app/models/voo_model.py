@@ -15,5 +15,3 @@ class VooModel(Base):
     preco: Mapped[int] = mapped_column(Integer, nullable=True)
     imagem_companhia: Mapped[bool] = mapped_column(String, nullable=True)
     
-    # Relacionamento com PassagemModel
-    passagens_voo: Mapped[List['PassagemModel']] = relationship('PassagemModel', back_populates='voo')

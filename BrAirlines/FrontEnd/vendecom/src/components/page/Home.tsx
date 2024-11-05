@@ -5,7 +5,7 @@ import PassagemCard from "../ui/passagemCard";
 import { Search } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import axios from "axios";
-import { OrbitProgress } from "react-loading-indicators";
+import { FourSquare } from "react-loading-indicators";
 
 interface Passagem {
   origem: string;
@@ -81,8 +81,10 @@ function Home() {
         </form>
       </div>
 
-      <div className="flex justify-center ">
-        {loading && <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />}
+      <div className="flex justify-center">
+        {loading && <div className="mt-28">
+          <FourSquare  color="#000000" size="medium" text="" textColor="" />
+        </div>}
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
@@ -101,10 +103,16 @@ function Home() {
           ))
         ) : (
           !loading && (
-            <div className="flex justify-center items-center w-full">
-              <p className="text-gray-600 text-center">
-                Não encontramos voos correspondentes à sua pesquisa.
+            <div className="flex flex-col items-center justify-center ">
+              <p className="text-center font-bold mt-10 text-red-600">
+              Não encontramos voos correspondentes à sua pesquisa.
               </p>
+              
+              <img
+                className="h-96 mt-4"
+                src="/notfoundticket.png"
+                alt="Imagem de passagem não encontrada"
+              />
             </div>
           )
         )}

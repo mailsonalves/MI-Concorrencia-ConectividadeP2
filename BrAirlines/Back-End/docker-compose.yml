@@ -1,13 +1,26 @@
-name: brairlines-db
-
+name: brairlines
 
 services:
-  db:
+  pg:
     image: postgres:11-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: brairlines
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: abacaxi01
+      POSTGRES_PASSWORD: abacaxi01 
+      POSTGRES_DB: brairlines
     ports:
       - "5432:5432"
-    
+
+  airlines_app:
+    image: brairlines_app
+    build: .
+    ports:
+      - "8001:8001"
+    depends_on:
+      - pg
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:abacaxi01@pg:5432/brairlines
+
+volumes:
+  pgdata:
