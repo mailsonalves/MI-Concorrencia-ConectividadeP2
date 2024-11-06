@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { FourSquare } from "react-loading-indicators";
-import { Frown } from "lucide-react";
+import { Frown, TicketsPlane } from "lucide-react";
 
 interface Passagem {
   id: string;
@@ -154,41 +154,46 @@ function ListTickets() {
           <FourSquare color="#000000" size="medium" text="" textColor="" />
         </div>
       ) : error ? (
-        <p className="flex justify-center gap-2 text-md mt-20 items-center font-bold text-red-600 col-span-4">
+        <p className="flex justify-center gap-2 text-md mt-20 items-center font-bold text-lg text-red-600 col-span-4">
           <span>
             <Frown />
           </span>
           {error}
         </p>
       ) : (
-        <ScrollArea className="h-screen">
-          {passagens.length > 0 ? (
-            passagens.map((passagem, index) => (
-              <PassagemCardUser
-                key={index}
-                origem={passagem.origem}
-                destino={passagem.destino}
-                preco={passagem.preco || passagem.preco_voo || 100}
-                imagemSrc={passagem.imagem_companhia || "/logo.jpeg"}
-                assento={passagem.assento}
-                companhia_aerea={passagem.companhia_aerea}
-                capacidade_voo={passagem.capacidade_voo}
-                id_passagem={passagem.id}
-              />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center ">
-              <p className="text-center font-bold mt-10 text-red-600">
-                Nenhuma passagem encontrada.
-              </p>
-              <img
-                className="h-96 mt-4"
-                src="/notfoundticket.png"
-                alt="Imagem de passagem não encontrada"
-              />
-            </div>
-          )}
-        </ScrollArea>
+        <div>
+          <div className="flex gap-4 justify-center items-center text-white font-bold rounded-bl-2xl rounded-br-2xl text-4xl py-5 bg-black border-t-2 border-white">
+            <TicketsPlane color="#64748b" size={40}/>
+            <h1 className="text-slate-500">Minhas Passagens</h1>
+          </div>     <ScrollArea className="h-screen">
+            {passagens.length > 0 ? (
+              passagens.map((passagem, index) => (
+                <PassagemCardUser
+                  key={index}
+                  origem={passagem.origem}
+                  destino={passagem.destino}
+                  preco={passagem.preco || passagem.preco_voo || 100}
+                  imagemSrc={passagem.imagem_companhia || "/logo.jpeg"}
+                  assento={passagem.assento}
+                  companhia_aerea={passagem.companhia_aerea}
+                  capacidade_voo={passagem.capacidade_voo}
+                  id_passagem={passagem.id}
+                />
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center ">
+                <p className="text-center font-bold mt-10 text-red-600">
+                  Nenhuma passagem encontrada.
+                </p>
+                <img
+                  className="h-96 mt-4"
+                  src="/notfoundticket.png"
+                  alt="Imagem de passagem não encontrada"
+                />
+              </div>
+            )}
+          </ScrollArea>
+        </div>
       )}
     </section>
   );

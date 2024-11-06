@@ -56,14 +56,14 @@ async def read_voos(db_session: DatabaseSession, limit: int = 15):
 
         async with httpx.AsyncClient() as client:
             try:
-                dados_B = await client.get("http://localhost:8000/voo/list_public")
+                dados_B = await client.get("http://localhost:8001/voo/list_public")
                 dados_B.raise_for_status()
                 voos_remotos.extend(dados_B.json().get('voos', []))
             except (httpx.RequestError, httpx.HTTPStatusError):
                 print("Erro ao comunicar com o Servidor B, continuando com os dados locais.")
 
             try:
-                dados_C = await client.get("http://localhost:8001/list_public")
+                dados_C = await client.get("http://localhost:8000/voo/list_public")
                 dados_C.raise_for_status()
                 voos_remotos.extend(dados_C.json().get('voos', []))
             except (httpx.RequestError, httpx.HTTPStatusError):
@@ -128,25 +128,17 @@ async def read_voos_origem_destino(db_session: DatabaseSession, origem: Optional
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Parâmetros insuficientes")
 
         # Busca voos remotos
-        voos_remotos_B = await fetch_voos_from_server("http://localhost:8000/voo/find_public", {"origem": origem, "destino": destino})
-        voos_remotos_C = await fetch_voos_from_server("http://localhost:8001/voo/find_public", {"origem": origem, "destino": destino})
+        voos_remotos_B = await fetch_voos_from_server("http://localhost:8001/voo/find_public", {"origem": origem, "destino": destino})
+        voos_remotos_C = await fetch_voos_from_server("http://localhost:8000/voo/find_public", {"origem": origem, "destino": destino})
 
-        todos_voos = voos + voos_remotos_B + voos_remotos_C
+
+        # Combina voos locais e remotos
+        todos_voos = voos + voos_remotos_B  + voos_remotos_C
 
         return {'voos': todos_voos}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao listar voos: {str(e)}") 
-
-@router.get("/list_public", response_model=VooSchemaList, summary="List Voos")
-async def read_voos(db_session: DatabaseSession, limit: int = 15):
-    try:
-        result = await db_session.execute(select(VooModel).limit(limit))
-        voos = result.scalars().all()
-        return {'voos': voos}
-    except:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos") 
     
-
 @router.get("/find_public", response_model=VooSchemaList, summary="List Voos")
 async def read_voos_origem_destino(db_session: DatabaseSession, origem: Optional[str] = None, destino: Optional[str] = None, voo_id: Optional[UUID] = None):  
     if origem and destino:
@@ -170,3 +162,12 @@ async def read_voos_origem_destino(db_session: DatabaseSession, origem: Optional
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erro ao listar voos: {str(e)}") 
+
+@router.get("/list_public", response_model=VooSchemaList, summary="List Voos")
+async def read_voos(db_session: DatabaseSession, limit: int = 15):
+    try:
+        result = await db_session.execute(select(VooModel).limit(limit))
+        voos = result.scalars().all()
+        return {'voos': voos}
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar voos") 
