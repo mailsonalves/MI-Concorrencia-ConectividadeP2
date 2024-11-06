@@ -62,19 +62,21 @@ function Home() {
 
   return (
     <section className="max-w-4xl mx-auto">
-      <div className="mt-10">
+      <div className=" flex gap-4 justify-center items-center  text-white font-bold rounded-bl-2xl rounded-br-2xl text-4xl py-5 bg-black border-t-2 border-white">
         <form onSubmit={handleSearch} className="flex items-center mx-auto gap-5">
           <Input
             placeholder="Origem"
             value={origem}
             onChange={(e) => setOrigem(e.target.value)}
+            className="bg-white text-black caret-black"
           />
           <Input
             placeholder="Destino"
             value={destino}
             onChange={(e) => setDestino(e.target.value)}
+            className="bg-white text-black caret-black"
           />
-          <Button type="submit">
+          <Button type="submit" variant={"secondary"}>
             <Search />
             Pesquisar
           </Button>

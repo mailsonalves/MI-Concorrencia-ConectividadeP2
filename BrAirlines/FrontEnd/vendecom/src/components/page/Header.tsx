@@ -48,6 +48,8 @@ function Header() {
   const [user, setUser] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [usernameCadastro, setUsernameCadastro] = useState("");
+  const [passwordCadastro, setpasswordCadastro] = useState("");
   const [cpf, setcCpf] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -76,20 +78,21 @@ function Header() {
     window.location.href = "/";
   };
   const handleCadastro = async () => {
-    if (!username || !password || !name || !cpf) {
+    if (!usernameCadastro || !passwordCadastro || !name || !cpf) {
       setError("Por favor, preencha todos os campos.");
       return;
     }
 
     const data = {
-      username: username,
-      password: password,
+      username: usernameCadastro,
+      password: passwordCadastro,
       nome: name,
       cpf: cpf,
     };
 
     try {
       const response = await axios.post("http://127.0.0.1:8001/user/", data);
+      window.location.reload();
       
     } catch (err) {
       console.error(err.response ? err.response.data : err);
@@ -160,7 +163,7 @@ function Header() {
                 <Link>
                   <img src="/brAirlines.jpeg" alt="" className="h-14 rounded-full" />
                 </Link>
-                <h1 className="text-white text-lg">BrAirlines</h1>
+                <h1 className="text-slate-500 text-2xl font-bold">BrAirlines</h1>
               </Link>
               <ul className="flex gap-2  mr-10">
                 <li>
@@ -184,7 +187,7 @@ function Header() {
                       )}
                     </DialogTrigger>
 
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[425px] ">
                       <DialogHeader>
                         <DialogTitle>Fazer Login</DialogTitle>
                         <DialogDescription>
@@ -255,8 +258,8 @@ function Header() {
                           </Label>
                           <Input
                             id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={usernameCadastro}
+                            onChange={(e) => setUsernameCadastro(e.target.value)}
                             className="col-span-3"
                           />
                         </div>
@@ -288,8 +291,8 @@ function Header() {
                           <Input
                             id="password"
                             type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={passwordCadastro}
+                            onChange={(e) => setpasswordCadastro(e.target.value)}
                             className="col-span-3"
                           />
                         </div>
@@ -311,7 +314,7 @@ function Header() {
                 <li>
                   {isLogged ? (
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger asChild className="mr-5">
                         <Button variant="outline">
                           <p>{user.nome}</p> <User />
                         </Button>

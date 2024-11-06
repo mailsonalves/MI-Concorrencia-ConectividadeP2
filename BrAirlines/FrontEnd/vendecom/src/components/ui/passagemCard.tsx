@@ -113,7 +113,8 @@ const PassagemCard: React.FC<PassagemCardProps> = ({
     <div>
       <div
         onClick={handleVoo}
-        className="flex cursor-pointer items-center my-6 gap-6 border-slate-500 border-2 rounded-2xl shadow-black hover:shadow-xl hover:drop-shadow-xl transition-shadow duration-300"
+        className="flex mx-10 cursor-pointer items-center my-6 gap-6 border-slate-500 border rounded-2xl shadow-black  hover:scale-105 transition-transform duration-300"
+
       >
         <img
           className="h-36 rounded-tl-2xl rounded-bl-2xl"

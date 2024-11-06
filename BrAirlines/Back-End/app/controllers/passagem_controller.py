@@ -25,11 +25,11 @@ router = APIRouter()
 async def buy_ticket_no_login(user_id: str, db_session: DatabaseSession, passagem: PassagemSchema):
     # Converte os dados da passagem recebida para o modelo do banco de dados
     passagem_data = passagem.model_dump()
-    passagem_model = PassagemModel(**passagem_data) 
+    passagem_model = PassagemModel(**passagem_data)
 
     try:
         capacidade_voo = await db_session.execute(
-            select(VooModel.capacidade_voo).where(VooModel.id == passagem.id_voo)
+            select(VooModel.capacidade_voo).where(VooModel.id == passagem.id_voo).with_for_update()
         )
         capacidade_voo = capacidade_voo.scalar()
         if capacidade_voo is None:
@@ -54,7 +54,7 @@ async def buy_ticket_no_login(user_id: str, db_session: DatabaseSession, passage
         select(PassagemModel).where(
             (PassagemModel.assento == passagem.assento)
             & (PassagemModel.id_voo == passagem.id_voo)
-        )
+        ).with_for_update()
     )
     if assento_ocupado.scalars().first():
         raise HTTPException(
@@ -81,9 +81,9 @@ async def buy_ticket_no_login(user_id: str, db_session: DatabaseSession, passage
 
 @router.post('/buy_ticket',  response_model=PassagemSchema, summary='Buy ticket')
 async def buy_ticket(
-    user_id: UUID, 
-    db_session: DatabaseSession, 
-    passagem: PassagemSchema2, 
+    user_id: UUID,
+    db_session: DatabaseSession,
+    passagem: PassagemSchema2,
     current_user=Depends(verify_login_current)
 ):
     # Converte os dados da passagem recebida para o modelo do banco de dados
@@ -98,14 +98,14 @@ async def buy_ticket(
 
     # Verifica se o usuário está logado
     if current_user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
 
     # Verifica se o usuário autenticado é o dono da passagem
     if current_user.id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sua sessão expirou. Por favor, faça login novamente.")
 
     # Processamento para diferentes companhias aéreas
-    if passagem.companhia_aerea == "BrAilines":
+    if passagem.companhia_aerea == "BrAirlines":
         # Lógica de compra para BrasilPass (processamento local)
         try:
             capacidade_voo = await db_session.execute(
@@ -124,7 +124,7 @@ async def buy_ticket(
 
         assento_ocupado = await db_session.execute(
             select(PassagemModel).where(
-                (PassagemModel.assento == passagem.assento) & 
+                (PassagemModel.assento == passagem.assento) &
                 (PassagemModel.id_voo == passagem.id_voo)
             ).with_for_update()
         )
@@ -137,26 +137,26 @@ async def buy_ticket(
         db_session.add(passagem_model)
         try:
             await db_session.commit()
-            return passagem_model 
+            return passagem_model
         except Exception:
             await db_session.rollback()
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Falha ao comprar passagem")
 
     elif passagem.companhia_aerea == "BrasilPass":
         return await attempt_buy_ticket_external(
-            "http://localhost:8000/ticket/buy_ticket_no_login", 
-            passagem_data, 
+            "http://localhost:8000/ticket/buy_ticket_no_login",
+            passagem_data,
+            str(user_id),
+            db_session
+        )
+    elif passagem.companhia_aerea == "VoeBr":
+        return await attempt_buy_ticket_external(
+            "http://localhost:8002/ticket/buy_ticket_no_login",
+            passagem_data,
             str(user_id),
             db_session
         )
 
-    elif passagem.companhia_aerea == "VoeBr":
-        return await attempt_buy_ticket_external(
-            "http://localhost:8002/ticket/buy_ticket_no_login", 
-            passagem_data, 
-            str(user_id),
-            db_session
-        )
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Companhia aérea inválida")
 
@@ -225,11 +225,11 @@ async def attempt_buy_ticket_external(url: str, data: dict, user_id: str, db_ses
         except Exception as e:
             # Captura outros erros, como problemas de rede, e tenta novamente
             print(f"Erro inesperado, tentativa {attempt + 1} de {max_retries}: {e}")
-        
+
         attempt += 1
         if attempt < max_retries:  # Espera antes da nova tentativa apenas se ainda restarem tentativas
             await asyncio.sleep(retry_delay)
-    
+
     # Se todas as tentativas falharem, reverte a compra local
     await rollback_local_purchase(db_session, data["id"])
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao completar a compra no servidor externo.")
@@ -247,11 +247,11 @@ async def rollback_local_purchase(db_session, ticket_id):
     except Exception as e:
         await db_session.rollback()
         print(f"Erro ao reverter compra local: {e}")
-      
+
 @router.get("/public-tickets", response_model=PassagemSchemaList, summary="List public tickets")
 async def list_public_tickets(user_id: UUID, db_session: DatabaseSession, limit: int = 15):
     # Valida o formato do UUID do usuário
-    
+
     # Realiza a consulta apenas no banco de dados local
     try:
         # Filtra as passagens locais apenas pelo id do passageiro
@@ -271,7 +271,7 @@ async def list_public_tickets(user_id: UUID, db_session: DatabaseSession, limit:
     except Exception as e:
         print(f"Erro ao listar passagens locais: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao listar passagens locais")
-    
+
 @router.get("/", response_model=PassagemSchemaList, summary="List tickets")
 async def list(user_id: UUID, db_session: DatabaseSession, limit: int = 15, current_user=Depends(verify_login_current)):
     # Validações iniciais
@@ -284,7 +284,7 @@ async def list(user_id: UUID, db_session: DatabaseSession, limit: int = 15, curr
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     if current_user.id != user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Sua sessão expirou. Por favor, faça login novamente.")
 
     # Consulta as passagens locais do usuário
     try:
@@ -296,7 +296,7 @@ async def list(user_id: UUID, db_session: DatabaseSession, limit: int = 15, curr
             PassagemModel.id_passageiro == user_id,
             PassagemModel.id_voo.in_(subquery_voo_ids)
         ).limit(limit)
-        
+
         local_result = await db_session.execute(local_tickets_query)
         local_tickets = local_result.scalars().all()
 
@@ -317,10 +317,10 @@ async def list(user_id: UUID, db_session: DatabaseSession, limit: int = 15, curr
             try:
                 response = await client.get(url)
                 response.raise_for_status()
-                
+
                 # Acessa a chave 'tickets' do dicionário retornado
                 tickets_data = response.json().get('tickets', [])
-                
+
                 return tickets_data  # Retorna a lista de passagens de cada servidor
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 print(f"Erro ao comunicar com {url}: {e}")
@@ -334,16 +334,16 @@ async def list(user_id: UUID, db_session: DatabaseSession, limit: int = 15, curr
     if combined_remote_tickets:
         # Combina passagens locais e remotas válidas
         return {'tickets': local_tickets + combined_remote_tickets}
-    
+
     # Retorna apenas passagens locais se não houver passagens remotas válidas
     return {'tickets': local_tickets}
 
-  
-    
+
+
 @router.delete("/{passagem_id}", response_model=DeletePassagemResponse, summary="Delete ticket")
 async def delete_ticket(
-    db_session: DatabaseSession, 
-    passagem_id: str, 
+    db_session: DatabaseSession,
+    passagem_id: str,
     current_user=Depends(verify_login_current)
 ):
     # Validação do UUID da passagem
@@ -352,12 +352,12 @@ async def delete_ticket(
     except ValueError:
         logger.error(f"ID inválido recebido: {passagem_id}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ID inválido. Deve ser um UUID.")
-    
+
     # Verificação do usuário atual
     if current_user is None:
         logger.error("Usuário não encontrado.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
-    
+
     # Busca a passagem no banco de dados local
     try:
         result = await db_session.execute(
@@ -367,16 +367,16 @@ async def delete_ticket(
     except Exception as e:
         logger.error(f"Erro ao buscar passagem: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao buscar passagem")
-    
+
     if ticket is None:
         logger.warning(f"Passagem não encontrada para ID: {passagem_id}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Passagem não encontrada")
-    
+
     # Verificação de permissão do usuário
     if ticket.id_passageiro != current_user.id:
         logger.warning(f"Permissão insuficiente para o usuário: {current_user.id} ao deletar a passagem {passagem_id}")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permissão insuficiente para deletar esta passagem")
-    
+
     # Tenta deletar a passagem no banco de dados
     try:
         await db_session.delete(ticket)
@@ -394,7 +394,7 @@ async def delete_ticket(
                 external_response = await delete_ticket_external("http://127.0.0.1:8000/ticket/delete_nologin", passagem_id)
             elif ticket.companhia_aerea == "VoeBr":
                 external_response = await delete_ticket_external("http://127.0.0.1:8002/ticket/delete_nologin", passagem_id)
-            
+
             if external_response.status_code != 200:
                 logger.error(f"Erro ao deletar passagem no servidor externo para ID: {passagem_id}")
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao deletar passagem no servidor externo")
@@ -451,3 +451,4 @@ async def delete_ticket(
         )
 
     return {"detail": "Passagem deletada com sucesso"}
+
