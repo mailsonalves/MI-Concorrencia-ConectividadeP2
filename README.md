@@ -69,7 +69,11 @@ Por fim, se todo o processo de verificação e reserva é concluído com sucesso
 Esse processo de bloqueio pessimista é fundamental para assegurar que reservas e verificações de disponibilidade ocorram de forma organizada, evitando conflitos e problemas de concorrência em operações de compra de passagens.
 
 # Confiabilidade da solução
-Caso um dos servidores estiver indisponível a aplicação não irá ficar fora do ar para o cliente do servidor em questão. A listagem de voos será feita somente dos voos disponíveis nos servidores ativos. Caso um servidor se desconecte durante o processo de compra de uma passagem que está disponível nele, ocorrerá um erro que foi tratado para exibir a mensagem mostrada na imagem x. A disponibilidade e confibialidade da aplicação fica por conta do próprio servidor do cliente.
+Caso um dos servidores fique indisponível, a aplicação não será interrompida para o cliente do servidor em questão. A listagem de voos exibirá apenas os voos disponíveis nos servidores ativos. Se um servidor se desconectar durante o processo de compra de uma passagem disponível nele, será exibida uma mensagem de erro específica (conforme imagem X), com o tratamento necessário para informar o usuário.
+
+Como a passagem comprada é registrada tanto no servidor local quanto no servidor remoto, em caso de falha de conexão com o servidor remoto, serão realizadas até três tentativas de reenvio, caso o código de resposta seja diferente de 200 (sucesso) ou 400 (solicitação inválida). Caso o problema persista, a aplicação fará um rollback, removendo a compra no servidor local para garantir a consistência dos dados.
+
+A disponibilidade e a confiabilidade da aplicação são asseguradas pelo próprio servidor do cliente.
 
 # Avaliação da Solução
 Testes foram realizados para analisar o comportamento do sistema em situações de falha em um dos servidores. Foi observado que, quando a operação não exige a participação de todos os servidores, os que permanecem ativos conseguem completar suas tarefas normalmente, atendendo ao requisito de que a falha de um servidor não deve afetar os demais. No entanto, ao tentar reservar uma passagem que depende de trechos gerenciados por todos os três servidores, a operação falha em todos eles, já que não é possível verificar a disponibilidade de assentos em todos os trechos necessários.
