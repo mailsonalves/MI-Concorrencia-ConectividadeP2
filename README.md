@@ -52,21 +52,39 @@ Já a figura 3 mostra a finalização de compra da passagem.
 </div>
 
 #  Protocolo de comunicação
-A comunicação foi realizada por meio de uma API REST, que recebe e envia dados em formato JSON, adotando o princípio stateless, no qual cada requisição contém todas as informações necessárias para seu processamento. Os endpoints são protegidos por autenticação, exigindo que os usuários estejam autenticados para realizar as seguintes operações: visualizar trechos, comprar passagens, consultar passagens e cancelar passagens. Foram implementados dois conjuntos de rotas: uma para a comunicação entre servidores e outra para a interação entre clientes e servidores. A documentação detalhada da API está disponível mais adiante neste artigo.
+A comunicação foi realizada por meio de uma API REST, que recebe e envia dados em formato JSON, adotando o princípio stateless, no qual cada requisição contém todas as informações necessárias para seu processamento. Os endpoints são protegidos por autenticação JWT, exigindo que os usuários estejam autenticados para realizar as seguintes operações: visualizar trechos, comprar passagens, consultar passagens e cancelar passagens. Foram implementados dois conjuntos de rotas: uma para a comunicação entre servidores e outra para a interação entre clientes e servidores. A documentação detalhada da API está disponível mais adiante neste artigo.
 
 # Interface da Aplicação
 Falar sobre o rest
 
 # Concorrência Distribuída
+O código utiliza uma abordagem de bloqueio pessimista para evitar conflitos quando vários usuários tentam reservar o mesmo voo ou assento ao mesmo tempo. A ideia principal desse bloqueio é garantir que, uma vez iniciado o processo de verificação de capacidade e de disponibilidade de assentos, outros processos que tentem acessar esses mesmos dados sejam temporariamente bloqueados até que a operação em andamento seja finalizada.
+
+No fluxo da compra de passagem, o sistema primeiro verifica se a capacidade do voo permite novas reservas. A aplicação bloqueia momentaneamente o registro do voo para assegurar que apenas uma transação por vez possa atualizar o número de assentos ocupados. Se a capacidade máxima do voo já tiver sido atingida, o sistema interrompe a transação, evitando que o voo ultrapasse o limite de reservas.
+
+Além disso, o bloqueio pessimista é aplicado na verificação de assentos individuais, garantindo que, durante a verificação, apenas uma transação tenha acesso ao registro específico do assento. Assim, se um usuário tentar reservar um assento que já foi atribuído, ele recebe um aviso de que o assento está ocupado. Isso evita que dois usuários reservem o mesmo assento em um mesmo voo.
+
+Por fim, se todo o processo de verificação e reserva é concluído com sucesso, o bloqueio é liberado e o sistema finaliza a operação. Caso contrário, ele interrompe o processo e desfaz qualquer mudança, garantindo que os dados de assentos e voos permaneçam consistentes, mesmo sob alta demanda. 
+
+Esse processo de bloqueio pessimista é fundamental para assegurar que reservas e verificações de disponibilidade ocorram de forma organizada, evitando conflitos e problemas de concorrência em operações de compra de passagens.
 
 # Confiabilidade da solução
+Caso um dos servidores estiver indisponível a aplicação não irá ficar fora do ar para o cliente do servidor em questão. A listagem de voos será feita somente dos voos disponíveis nos servidores ativos. Caso um servidor se desconecte durante o processo de compra de uma passagem que está disponível nele, ocorrerá um erro que foi tratado para exibir a mensagem mostrada na imagem x. A disponibilidade e confibialidade da aplicação fica por conta do próprio servidor do cliente.
 
 # Avaliação da Solução
+Testes foram realizados para analisar o comportamento do sistema em situações de falha em um dos servidores. Foi observado que, quando a operação não exige a participação de todos os servidores, os que permanecem ativos conseguem completar suas tarefas normalmente, atendendo ao requisito de que a falha de um servidor não deve afetar os demais. No entanto, ao tentar reservar uma passagem que depende de trechos gerenciados por todos os três servidores, a operação falha em todos eles, já que não é possível verificar a disponibilidade de assentos em todos os trechos necessários.
+
+As operações que podem ser executadas de forma independente incluem a visualização de trechos, de passagens compradas, o registro e o login. Contudo, se algum servidor estiver fora do ar, os trechos específicos desse servidor não serão exibidos ao cliente, deixando as informações aparentes incompletas. Esse problema é registrado em log no terminal, indicando a falha em um ou mais servidores.
 
 # Documentação do código
 
 # Docker
+Devido a necessidade de ter vários containers com serviços diferentes executando, foi usado o Docker Compose para gerenciá-los. Ao todo são 3 containers, sendo um para cada servidor.
+Assim, o arquivo docker-compose.yaml une a execução dos contêineres, permitindo o build e execução dos componentes de cada uma das companhias aéreas a partir do comando:
+<code>docker compose up --build</code>
 
+
+As dependências são instaladas através do Dockerfile
 # Conclusão
 O PassCom foi desenvolvido como um sistema básico cliente-servidor, utilizando a API REST para comunicação e adotando princípios de servidor stateless. Isso permite uma comunicação eficiente entre clientes e servidores. A escolha da API REST contribui para uma melhor performance, maior confiabilidade e abre possibilidades para futuras expansões do sistema.
 
