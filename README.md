@@ -101,9 +101,13 @@ Falar sobre o rest
 
 # Funcionamento da Aplicação
 Um resumo dos principais endpoints e do funcionamento da aplicação envolve o processo de compra de passagem, onde foi feito o tratamento da concorrência distribuida do sitema.
-A seguir, explicaremos o funcionamento dos endpoints  (/buy_ticket) e (/delete_ticket) que são críticos no processo de concorrência entre os servidores das 3 empresas envolvidas.
+A seguir, explicaremos o funcionamento dos endpoints  (/buy_ticket) e (/delete_ticket) que são críticos no processo de concorrência entre os servidores das 3 empresas envolvidas.Mais adiante no tópico da Documentação do código serão mostrados os demais endpoints da aplicação. Na imagem abaixo mostra como funciona o processo de compra.
+<div align="center">
+<img src="https://github.com/user-attachments/assets/bc2a8fbb-be27-4078-8801-d7792fc01af0" width="700">
+</div>
 
-Mais adiante no tópico da Documentação do código serão mostrados os demais endpoints da aplicação. 
+
+ 
 <h3>Compra de passagem</h3>
 No processo de compra de passagem deste sistema, o usuário realiza a solicitação através de uma rota específica (/buy_ticket) que espera receber alguns dados essenciais, como o identificador do usuário (user_id), as informações da passagem e uma sessão de banco de dados para controlar a transação.
 A Figura 5 mostra a tela de compra de passagem, onde é feito o processo indicado anteriormente.
